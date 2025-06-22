@@ -90,21 +90,6 @@ if [[ "$MODE" == "benchmark" ]]; then
     echo "Recomendación: Ejecuta este benchmark regularmente (mensual/trimestral)"
     echo "   para monitorear el estado de seguridad del sistema."
     
-    # Cleanup para modo benchmark
-    if [[ ${#BENCHMARK_PACKAGES[@]} -gt 0 ]]; then
-        echo ""
-        read -r -p "¿Quieres limpiar los paquetes instalados para el benchmark? (y/N): " cleanup_resp
-        cleanup_resp=${cleanup_resp,,}
-        
-        if [[ "$cleanup_resp" == "y" || "$cleanup_resp" == "yes" || "$cleanup_resp" == "si" || "$cleanup_resp" == "s" ]]; then
-            echo "Limpiando paquetes instalados: ${BENCHMARK_PACKAGES[*]}"
-            apt remove -y "${BENCHMARK_PACKAGES[@]}"
-            apt autoremove -y
-            apt autoclean
-            echo "Cleanup completado"
-        fi
-    fi
-    
     exit 0
 fi
 
@@ -417,43 +402,6 @@ else
 fi
 
 echo "Endurecimiento CIS (level1-server) completado con éxito."
-
-# ---- 7. Cleanup de paquetes instalados durante el script ---------------------
-if [[ ${#INSTALLED_PACKAGES[@]} -gt 0 ]]; then
-    echo ""
-    echo "CLEANUP DE PAQUETES"
-    echo "==================="
-    echo "Los siguientes paquetes se instalaron durante la ejecución del script:"
-    printf '   • %s\n' "${INSTALLED_PACKAGES[@]}"
-    echo ""
-    read -r -p "¿Quieres mantener estos paquetes instalados? (Y/n): " keep_packages_resp
-    keep_packages_resp=${keep_packages_resp,,}
-    
-    if [[ "$keep_packages_resp" == "n" || "$keep_packages_resp" == "no" ]]; then
-        echo "Removiendo paquetes instalados durante el script..."
-        apt remove -y "${INSTALLED_PACKAGES[@]}"
-        echo "Limpiando dependencias no utilizadas..."
-        apt autoremove -y
-        apt autoclean
-        echo "Cleanup de paquetes completado"
-    else
-        echo "Manteniendo paquetes instalados"
-        echo "Para limpiar dependencias no utilizadas ejecuta: apt autoremove"
-    fi
-else
-    echo ""
-    echo "No se instalaron paquetes nuevos durante la ejecución"
-    echo "Limpiando dependencias no utilizadas..."
-    apt autoremove -y
-    apt autoclean
-fi
-
-# ---- 8. Cleanup de archivos temporales ----------------------------------------
-echo ""
-echo "Limpiando archivos temporales..."
-rm -rf "$REPO_DIR" 2>/dev/null || true
-rm -f "$PLAYBOOK" 2>/dev/null || true
-echo "Archivos temporales eliminados"
 
 # ---- 9. Pregunta de reinicio del sistema --------------------------------------
 echo ""
